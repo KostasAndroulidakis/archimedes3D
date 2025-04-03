@@ -30,3 +30,17 @@
 *.exe
 *.out
 *.app
+
+# Build directories
+build/
+.cache/
+**/CMakeFiles/
+*.o
+*.a
+*.d
+*.out
+compile_commands.json
+
+# IDE files
+.vscode/
+.idea/

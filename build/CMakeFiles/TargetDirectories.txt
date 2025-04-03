@@ -1,8 +1,0 @@
-/Users/kanon/projects/archimedes3D/build/CMakeFiles/archimedes.dir
-/Users/kanon/projects/archimedes3D/build/CMakeFiles/BuoyancyDemo.dir
-/Users/kanon/projects/archimedes3D/build/CMakeFiles/AtmosphereDemo.dir
-/Users/kanon/projects/archimedes3D/build/CMakeFiles/PressureSystemDemo.dir
-/Users/kanon/projects/archimedes3D/build/CMakeFiles/ElectromagneticDemo.dir
-/Users/kanon/projects/archimedes3D/build/CMakeFiles/BalloonTest.dir
-/Users/kanon/projects/archimedes3D/build/CMakeFiles/edit_cache.dir
-/Users/kanon/projects/archimedes3D/build/CMakeFiles/rebuild_cache.dir
