@@ -1,5 +1,8 @@
-# Prerequisites
-*.d
+# Build directories and outputs
+build/
+.cache/
+**/CMakeFiles/
+compile_commands.json
 
 # Compiled Object files
 *.slo
@@ -31,16 +34,15 @@
 *.out
 *.app
 
-# Build directories
-build/
-.cache/
-**/CMakeFiles/
-*.o
-*.a
+# Dependency files
 *.d
-*.out
-compile_commands.json
 
 # IDE files
 .vscode/
 .idea/
+*.swp
+*~
+
+# OS-specific files
+.DS_Store
+Thumbs.db
