@@ -40,12 +40,21 @@ set(MATH_SOURCES
     src/math/Vector2.cpp
 )
 
+# Manager sources
+set(MANAGER_SOURCES
+    src/managers/ObjectManager.cpp
+    src/managers/MediumManager.cpp
+    src/managers/FieldManager.cpp
+    src/managers/IonosphereManager.cpp
+)
+
 # Create library
 add_library(archimedes STATIC
     ${CORE_SOURCES}
     ${PHYSICS_SOURCES}
     ${ENVIRONMENT_SOURCES}
     ${MATH_SOURCES}
+    ${MANAGER_SOURCES}
 )
 
 # Set include directories for the library

@@ -1,181 +1,114 @@
 #include "World.h"
-#include "../physics/ChargedObject.h"
-#include "../environment/Electromagnetism.h"
-#include "../utils/Constants.h"
+#include "../physics/PhysicsObject.h"
+#include "../physics/ElectromagneticField.h"
+#include "../physics/PlasmaField.h"
+#include "../environment/Medium.h"
+#include "../environment/LayeredMedium.h"
+#include "../managers/ObjectManager.h"
+#include "../managers/MediumManager.h"
+#include "../managers/FieldManager.h"
+#include "../managers/IonosphereManager.h"
 #include <random>
 
 namespace Archimedes {
 
-World::World() 
-    : m_uniformMedium(Constants::Environment::Standard::AIR_DENSITY),  // Default medium is air
-      m_usingLayeredMedium(false),
-      m_usingElectromagnetism(false),
-      m_usingIonosphere(false) {
+World::World() {
+    // Initialize managers
+    m_objectManager = std::make_shared<ObjectManager>();
+    m_mediumManager = std::make_shared<MediumManager>();
+    m_fieldManager = std::make_shared<FieldManager>();
+    m_ionosphereManager = std::make_shared<IonosphereManager>();
 }
 
+// Object management delegated to ObjectManager
 void World::addObject(std::shared_ptr<PhysicsObject> object) {
-    m_objects.push_back(object);
+    m_objectManager->addObject(object);
 }
 
+const std::vector<std::shared_ptr<PhysicsObject>>& World::getObjects() const {
+    return m_objectManager->getObjects();
+}
+
+// Medium management delegated to MediumManager
 void World::setMedium(const Medium& medium) {
-    m_uniformMedium = medium;
-    m_usingLayeredMedium = false;
+    m_mediumManager->setMedium(medium);
 }
 
 void World::setLayeredMedium(std::shared_ptr<LayeredMedium> medium) {
-    m_layeredMedium = medium;
-    m_usingLayeredMedium = true;
-}
-
-void World::setFieldManager(std::shared_ptr<FieldManager> fieldManager) {
-    m_fieldManager = fieldManager;
-    m_usingElectromagnetism = true;
-}
-
-void World::setIonosphere(std::shared_ptr<Ionosphere> ionosphere) {
-    m_ionosphere = ionosphere;
-    m_usingIonosphere = true;
+    m_mediumManager->setLayeredMedium(medium);
 }
 
 float World::getDensityAtPosition(const Vector2& position) const {
-    if (m_usingLayeredMedium && m_layeredMedium) {
-        return m_layeredMedium->getDensityAtHeight(position.y);
-    }
-    return m_uniformMedium.getDensity();
+    return m_mediumManager->getDensityAtPosition(position);
 }
 
 float World::getViscosityAtPosition(const Vector2& position) const {
-    if (m_usingLayeredMedium && m_layeredMedium) {
-        return m_layeredMedium->getViscosityAtHeight(position.y);
-    }
-    return m_uniformMedium.getViscosity();
+    return m_mediumManager->getViscosityAtPosition(position);
 }
 
 float World::getPressureAtPosition(const Vector2& position) const {
-    if (m_usingLayeredMedium && m_layeredMedium) {
-        return m_layeredMedium->getPressureAtHeight(position.y);
-    }
-    return Constants::Environment::Standard::ATMOSPHERIC_PRESSURE;
+    return m_mediumManager->getPressureAtPosition(position);
 }
 
 float World::getTemperatureAtPosition(const Vector2& position) const {
-    if (m_usingLayeredMedium && m_layeredMedium) {
-        return m_layeredMedium->getTemperatureAtHeight(position.y);
-    }
-    return Constants::Environment::Standard::STANDARD_TEMPERATURE;
+    return m_mediumManager->getTemperatureAtPosition(position);
+}
+
+// Field management delegated to FieldManager
+void World::setElectromagneticField(std::shared_ptr<ElectromagneticField> field) {
+    m_fieldManager->setElectromagneticField(field);
+}
+
+void World::setPlasmaField(std::shared_ptr<PlasmaField> field) {
+    m_fieldManager->setPlasmaField(field);
 }
 
 Vector2 World::getElectricFieldAt(const Vector2& position) const {
-    if (m_usingElectromagnetism && m_fieldManager) {
-        return m_fieldManager->getNetFieldVector(position, FieldType::Electric);
-    }
-    return Vector2(0.0f, 0.0f);
+    return m_fieldManager->getElectricFieldAt(position);
 }
 
 Vector2 World::getMagneticFieldAt(const Vector2& position) const {
-    if (m_usingElectromagnetism && m_fieldManager) {
-        return m_fieldManager->getNetFieldVector(position, FieldType::Magnetic);
-    }
-    return Vector2(0.0f, 0.0f);
+    return m_fieldManager->getMagneticFieldAt(position);
 }
 
 Vector2 World::getPlasmaFieldAt(const Vector2& position) const {
-    if (m_usingElectromagnetism && m_fieldManager) {
-        return m_fieldManager->getNetFieldVector(position, FieldType::Plasma);
-    }
-    return Vector2(0.0f, 0.0f);
+    return m_fieldManager->getPlasmaFieldAt(position);
+}
+
+// Ionosphere management delegated to IonosphereManager
+void World::setIonosphere(std::shared_ptr<Ionosphere> ionosphere) {
+    m_ionosphereManager->setIonosphere(ionosphere);
 }
 
 float World::getIonizationAt(const Vector2& position) const {
-    if (m_usingIonosphere && m_ionosphere) {
-        return m_ionosphere->getIonizationAt(position);
-    }
-    return 0.0f;
+    return m_ionosphereManager->getIonizationAt(position);
 }
 
 void World::generateLightningStrike(const Vector2& position) {
-    if (m_usingElectromagnetism && m_fieldManager) {
-        // Generate lightning strike
-        auto lightning = Electromagnetism::createLightningStrike(position);
-        m_fieldManager->addField(lightning);
-    }
-}
-
-void World::updateObjectElectromagnetism(std::shared_ptr<PhysicsObject> object) {
-    auto charged = std::dynamic_pointer_cast<ChargedObject>(object);
-    if (!charged) {
-        return;
-    }
-    
-    Vector2 position = charged->getPosition();
-    
-    // Get field vectors at object position
-    Vector2 electricField = getElectricFieldAt(position);
-    Vector2 magneticField = getMagneticFieldAt(position);
-    
-    // Apply fields to charged object
-    charged->applyElectromagneticForce(electricField, magneticField);
-    
-    // Apply plasma effects (if ionosphere present)
-    if (m_usingIonosphere && m_ionosphere) {
-        if (m_ionosphere->containsPosition(position)) {
-            Vector2 plasmaField = getPlasmaFieldAt(position);
-            float ionization = getIonizationAt(position);
-            
-            // Add plasma field effects (simple additional force)
-            charged->applyElectromagneticForce(plasmaField * ionization, Vector2(0.0f, 0.0f));
-        }
-    }
+    m_ionosphereManager->generateLightningStrike(position);
 }
 
 void World::update(float deltaTime) {
-    // Update electromagnetic fields
-    if (m_usingElectromagnetism && m_fieldManager) {
-        m_fieldManager->update(deltaTime);
+    // First update all specialized systems
+    m_ionosphereManager->update(deltaTime);
+    
+    // Apply electromagnetic forces to objects
+    for (const auto& object : m_objectManager->getObjects()) {
+        m_fieldManager->applyElectromagneticForces(object);
     }
     
-    // Update ionosphere
-    if (m_usingIonosphere && m_ionosphere) {
-        m_ionosphere->update(deltaTime);
-    }
-    
-    // Apply electromagnetic forces first
-    if (m_usingElectromagnetism) {
-        for (auto& object : m_objects) {
-            updateObjectElectromagnetism(object);
-        }
-    }
-    
-    // Update all physics objects with medium forces
-    for (auto& object : m_objects) {
+    // Now update physics for each object using the current medium
+    for (const auto& object : m_objectManager->getObjects()) {
         Vector2 position = object->getPosition();
         
-        if (m_usingLayeredMedium && m_layeredMedium) {
-            // Create a local medium with properties from the object's position
-            Medium localMedium(
-                getDensityAtPosition(position),
-                getViscosityAtPosition(position)
-            );
-            object->update(deltaTime, localMedium);
-        } else {
-            object->update(deltaTime, m_uniformMedium);
-        }
-    }
-    
-    // Random lightning generation
-    if (m_usingElectromagnetism && m_usingIonosphere) {
-        std::random_device rd;
-        std::mt19937 gen(rd());
-        std::uniform_real_distribution<float> chance(0.0f, 1.0f);
-        std::uniform_real_distribution<float> posX(
-            Constants::Environment::Lightning::MIN_POSITION_X,
-            Constants::Environment::Lightning::MAX_POSITION_X
+        // Create a local medium with properties from the object's position
+        Medium localMedium(
+            m_mediumManager->getDensityAtPosition(position),
+            m_mediumManager->getViscosityAtPosition(position)
         );
         
-        if (chance(gen) < Constants::Environment::Lightning::GENERATION_PROBABILITY) {
-            Vector2 strikePos(posX(gen), 0.0f);  // Random X, at ground level
-            generateLightningStrike(strikePos);
-        }
+        // Update the object with the local medium
+        object->update(deltaTime, localMedium);
     }
 }
 
