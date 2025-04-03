@@ -1,6 +1,11 @@
 #pragma once
 
 #include "PhysicsObject.h"
+#include "../environment/Medium.h"
+namespace Archimedes {
+// Forward declaration
+class Pressure;
+}
 
 namespace Archimedes {
 

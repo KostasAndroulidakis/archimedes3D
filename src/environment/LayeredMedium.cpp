@@ -1,6 +1,6 @@
 #include "LayeredMedium.h"
 #include <algorithm>
-#include "../utils/Constants.h"
+#include "../constants/Constants.h"
 
 namespace Archimedes {
 

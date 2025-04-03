@@ -1,107 +1,153 @@
 #pragma once
 
-#include "ElectromagneticField.h"
-#include "FieldTypes.h"
-#include <vector>
+#include "../math/Vector2.h"
+#include <cstdlib> // For rand() function
+
+// Forward declarations for constants
+namespace Archimedes {
+namespace Constants {
+namespace Physics {
+// Forward declarations if needed
+}
+}
+}
 
 namespace Archimedes {
 
-// Plasma discharge types
+// Types of plasma discharges
 enum class DischargeType {
-    Corona,         // Glow around charged objects
-    Arc,            // Continuous discharge between points
-    Lightning,      // Intense, brief discharge
-    AuroraEffect    // Atmospheric light display near poles
+    LightningBolt,
+    AuroraEffect,
+    SolarFlare,
+    PlasmaSheet
 };
 
-// Class for modeling plasma phenomena
 class PlasmaField {
 public:
-    PlasmaField(float strength, const Vector2& center, float radius);
+    PlasmaField(float strength, const Vector2& position, float radius = 1000.0f)
+        : m_strength(strength), m_position(position), m_radius(radius),
+          m_dischargeType(DischargeType::AuroraEffect), m_ionizationLevel(0.5f),
+          m_temperature(5000.0f), m_active(true), m_elapsedTime(0.0f),
+          m_duration(-1.0f) {} // -1 for indefinite duration
     
-    // Get plasma properties
-    Vector2 getCenter() const { return m_center; }
-    float getRadius() const { return m_radius; }
-    float getTemperature() const { return m_temperature; }
-    float getIonizationLevel() const { return m_ionizationLevel; }
-    DischargeType getDischargeType() const { return m_dischargeType; }
-    
-    // Set plasma properties
-    void setCenter(const Vector2& center) { m_center = center; }
+    // Set field properties
+    void setStrength(float strength) { m_strength = strength; }
+    void setPosition(const Vector2& position) { m_position = position; }
     void setRadius(float radius) { m_radius = radius; }
-    void setTemperature(float temperature) { m_temperature = temperature; }
-    void setIonizationLevel(float level) { m_ionizationLevel = level; }
     void setDischargeType(DischargeType type) { m_dischargeType = type; }
+    void setIonizationLevel(float level) { m_ionizationLevel = level; }
+    void setTemperature(float temp) { m_temperature = temp; }
+    void setDuration(float duration) { m_duration = duration; }
     
-    // Get field at position
-    Vector2 getFieldAt(const Vector2& position) const;
-    float getFieldStrengthAt(const Vector2& position) const;
+    // Get field properties
+    float getStrength() const { return m_strength; }
+    Vector2 getPosition() const { return m_position; }
+    float getRadius() const { return m_radius; }
+    DischargeType getDischargeType() const { return m_dischargeType; }
+    float getIonizationLevel() const { return m_ionizationLevel; }
+    float getTemperature() const { return m_temperature; }
+    bool isActive() const { return m_active; }
     
-    // Calculate ionization effect at position
-    float getIonizationAt(const Vector2& position) const;
+    // Calculate field vector at position
+    Vector2 getFieldVector(const Vector2& position) const {
+        if (!m_active) {
+            return Vector2(0.0f, 0.0f);
+        }
+        
+        // Distance from field center
+        Vector2 direction = position - m_position;
+        float distance = direction.magnitude();
+        
+        // If outside radius, no effect
+        if (distance > m_radius) {
+            return Vector2(0.0f, 0.0f);
+        }
+        
+        // Normalize direction and scale by strength and distance
+        if (distance > 0.001f) {
+            direction = direction * (1.0f / distance);
+        } else {
+            return Vector2(0.0f, 0.0f); // At exact center, no direction
+        }
+        
+        // Field strength falls off with distance
+        float normalizedDistance = distance / m_radius;
+        float strengthFactor = m_strength * (1.0f - normalizedDistance);
+        
+        // Different discharge types have different field patterns
+        switch (m_dischargeType) {
+            case DischargeType::LightningBolt:
+                // Lightning fields are strongly directional (vertical)
+                return Vector2(0.0f, -1.0f) * strengthFactor;
+                
+            case DischargeType::AuroraEffect:
+                // Aurora fields have swirling patterns
+                return Vector2(-direction.y, direction.x) * strengthFactor;
+                
+            case DischargeType::SolarFlare:
+                // Solar flares explode outward
+                return direction * strengthFactor;
+                
+            case DischargeType::PlasmaSheet:
+                // Plasma sheets flow horizontally
+                return Vector2(1.0f, 0.0f) * strengthFactor;
+                
+            default:
+                return direction * strengthFactor;
+        }
+    }
     
-    // Update plasma behavior
-    void update(float deltaTime);
-    
-    // Generate lightning discharge between points
-    static std::shared_ptr<LightningField> generateLightning(
-        const Vector2& start, const Vector2& end, float strength, float duration);
+    // Update the field
+    void update(float deltaTime) {
+        // If has limited duration, check if expired
+        if (m_duration > 0.0f) {
+            m_elapsedTime += deltaTime;
+            if (m_elapsedTime >= m_duration) {
+                m_active = false;
+            }
+        }
+        
+        // Different update behavior based on discharge type
+        switch (m_dischargeType) {
+            case DischargeType::LightningBolt:
+                // Lightning bolts decay rapidly
+                m_strength *= 0.9f;
+                if (m_strength < 0.1f) {
+                    m_active = false;
+                }
+                break;
+                
+            case DischargeType::AuroraEffect:
+                // Auroras slowly fluctuate
+                m_strength = m_strength * 0.99f + m_strength * 0.02f * (rand() / (float)RAND_MAX);
+                break;
+                
+            case DischargeType::SolarFlare:
+                // Solar flares expand
+                m_radius += 10.0f * deltaTime;
+                m_strength -= 0.1f * deltaTime;
+                if (m_strength <= 0.0f) {
+                    m_active = false;
+                }
+                break;
+                
+            case DischargeType::PlasmaSheet:
+                // Plasma sheets move
+                m_position = m_position + Vector2(10.0f * deltaTime, 0.0f);
+                break;
+        }
+    }
     
 private:
-    Vector2 m_center;           // Center of plasma field
-    float m_strength;           // Field strength
-    float m_radius;             // Radius of influence
-    float m_temperature;        // Temperature in Kelvin
-    float m_ionizationLevel;    // Level of ionization (0-1)
-    DischargeType m_dischargeType; // Type of discharge
-    
-    // Internal state variables
-    float m_timeAccumulator;    // For time-based effects
-    float m_oscillationPhase;   // For plasma oscillations
-};
-
-// Ionosphere model for the earth
-class Ionosphere {
-public:
-    Ionosphere(float baseHeight, float thickness);
-    
-    // Get ionosphere properties
-    float getBaseHeight() const { return m_baseHeight; }
-    float getThickness() const { return m_thickness; }
-    float getIonDensity() const { return m_ionDensity; }
-    
-    // Check if a position is inside the ionosphere
-    bool containsPosition(const Vector2& position) const;
-    
-    // Get ionosphere field effect at position
-    Vector2 getFieldVectorAt(const Vector2& position) const;
-    
-    // Get ionization level at position
-    float getIonizationAt(const Vector2& position) const;
-    
-    // Create a lightning discharge in the ionosphere
-    void generateLightningStrike(const Vector2& position);
-    
-    // Add plasma discharge
-    void addPlasmaField(std::shared_ptr<PlasmaField> plasma);
-    
-    // Update ionosphere state
-    void update(float deltaTime);
-    
-private:
-    float m_baseHeight;         // Height where ionosphere begins
-    float m_thickness;          // Thickness of the ionosphere
-    float m_ionDensity;         // Density of charged particles
-    float m_fieldStrength;      // Strength of the electromagnetic field
-    
-    std::vector<std::shared_ptr<PlasmaField>> m_plasmaFields;
-    std::vector<std::shared_ptr<LightningField>> m_lightningFields;
-    
-    // Update lightning fields
-    void updateLightning(float deltaTime);
-    
-    // Clean up expired lightning
-    void cleanupExpiredLightning();
+    float m_strength;
+    Vector2 m_position;
+    float m_radius;
+    DischargeType m_dischargeType;
+    float m_ionizationLevel;
+    float m_temperature;
+    bool m_active;
+    float m_elapsedTime;
+    float m_duration;
 };
 
 } // namespace Archimedes

@@ -2,11 +2,6 @@
 
 #include <memory>
 #include "../math/Vector2.h"
-// Include manager classes - these are actually used in the implementation
-#include "../managers/ObjectManager.h"
-#include "../managers/MediumManager.h"
-#include "../managers/FieldManager.h"
-#include "../managers/IonosphereManager.h"
 
 namespace Archimedes {
 
@@ -17,43 +12,45 @@ class LayeredMedium;
 class Ionosphere;
 class ElectromagneticField;
 class PlasmaField;
+class ObjectManager;
+class MediumManager;
+class FieldManager;
+class IonosphereManager;
 
+/**
+ * World class manages the simulation world and delegates specific responsibilities
+ * to specialized manager classes. It provides a unified interface for interacting
+ * with the physics simulation environment.
+ */
 class World {
 public:
     World();
+    ~World();
     
-    // Object management
-    void addObject(std::shared_ptr<PhysicsObject> object);
-    const std::vector<std::shared_ptr<PhysicsObject>>& getObjects() const;
+    // Manager accessors
+    ObjectManager* getObjectManager() const;
+    MediumManager* getMediumManager() const;
+    FieldManager* getFieldManager() const;
+    IonosphereManager* getIonosphereManager() const;
     
-    // Medium management
-    void setMedium(const Medium& medium);
-    void setLayeredMedium(std::shared_ptr<LayeredMedium> medium);
+    // Query methods for world properties at a position
     float getDensityAtPosition(const Vector2& position) const;
     float getViscosityAtPosition(const Vector2& position) const;
     float getPressureAtPosition(const Vector2& position) const;
     float getTemperatureAtPosition(const Vector2& position) const;
-    
-    // Field management
-    void setElectromagneticField(std::shared_ptr<ElectromagneticField> field);
-    void setPlasmaField(std::shared_ptr<PlasmaField> field);
     Vector2 getElectricFieldAt(const Vector2& position) const;
     Vector2 getMagneticFieldAt(const Vector2& position) const;
     Vector2 getPlasmaFieldAt(const Vector2& position) const;
-    
-    // Ionosphere management
-    void setIonosphere(std::shared_ptr<Ionosphere> ionosphere);
     float getIonizationAt(const Vector2& position) const;
-    void generateLightningStrike(const Vector2& position);
     
     // Update physics simulation
     void update(float deltaTime);
     
 private:
-    std::shared_ptr<ObjectManager> m_objectManager;
-    std::shared_ptr<MediumManager> m_mediumManager;
-    std::shared_ptr<FieldManager> m_fieldManager;
-    std::shared_ptr<IonosphereManager> m_ionosphereManager;
+    std::unique_ptr<ObjectManager> m_objectManager;
+    std::unique_ptr<MediumManager> m_mediumManager;
+    std::unique_ptr<FieldManager> m_fieldManager;
+    std::unique_ptr<IonosphereManager> m_ionosphereManager;
 };
 
 } // namespace Archimedes

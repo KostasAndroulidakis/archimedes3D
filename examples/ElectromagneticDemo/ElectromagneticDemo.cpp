@@ -4,6 +4,7 @@
 // PlasmaField.h is included through Electromagnetism.h
 // #include "../../src/physics/PlasmaField.h"
 #include "../../src/environment/Electromagnetism.h"
+// Use LayeredMedium.h which includes AtmosphereLayer.h
 #include "../../src/environment/Atmosphere.h"
 #include <iostream>
 #include <iomanip>
@@ -132,7 +133,9 @@ void runChargedObjectsDemo() {
     );
     fieldManager->addField(electricField);
     
-    engine.getWorld()->setFieldManager(fieldManager);
+    // The World now requires a unique_ptr instead of shared_ptr, extract it
+    FieldManager* fieldManagerPtr = fieldManager.get();
+    engine.getWorld()->getFieldManager()->copyFrom(*fieldManagerPtr);
     
     // Create charged objects with opposing charges - starting from same X position with velocity
     auto positiveCharge = std::make_shared<ChargedObject>(0.05f, 0.01f, 5.0f, Vector2(-40.0f, 50.0f));
@@ -148,9 +151,9 @@ void runChargedObjectsDemo() {
     negativeCharge->setMagneticSusceptibility(0.8f);
     
     // Add objects to world
-    engine.getWorld()->addObject(positiveCharge);
-    engine.getWorld()->addObject(negativeCharge);
-    engine.getWorld()->addObject(neutralObject);
+    engine.getWorld()->getObjectManager()->addObject(positiveCharge);
+    engine.getWorld()->getObjectManager()->addObject(negativeCharge);
+    engine.getWorld()->getObjectManager()->addObject(neutralObject);
     
     // Visualize initial field
     visualizeField(*fieldManager, FieldType::Electric, -50.0f, 50.0f, -20.0f, 80.0f, 40, 25);
@@ -192,17 +195,18 @@ void runPlasmaDemo() {
     
     // Create atmospheric model with electromagnetic fields
     auto atmosphere = Atmosphere::createStandardModel();
-    engine.getWorld()->setLayeredMedium(atmosphere);
+    engine.getWorld()->getMediumManager()->setLayeredMedium(atmosphere);
     
     auto fieldManager = Electromagnetism::createStandardModel();
-    engine.getWorld()->setFieldManager(fieldManager);
+    FieldManager* fieldManagerPtr = fieldManager.get();
+    engine.getWorld()->getFieldManager()->copyFrom(*fieldManagerPtr);
     
     auto ionosphere = Electromagnetism::createIonosphere();
-    engine.getWorld()->setIonosphere(ionosphere);
+    engine.getWorld()->getIonosphereManager()->setIonosphere(ionosphere);
     
     // Create aurora plasma field
     auto aurora = Electromagnetism::createAuroraField();
-    ionosphere->addPlasmaField(aurora);
+    engine.getWorld()->getFieldManager()->setPlasmaField(aurora);
     
     // Create charged objects at different altitudes
     auto groundObject = std::make_shared<ChargedObject>(1.0f, 0.1f, 0.5f, Vector2(0.0f, 0.0f));
@@ -215,9 +219,9 @@ void runPlasmaDemo() {
     ionosphereObject->setPlasmaInteractionFactor(0.9f);
     
     // Add objects to world
-    engine.getWorld()->addObject(groundObject);
-    engine.getWorld()->addObject(atmosphereObject);
-    engine.getWorld()->addObject(ionosphereObject);
+    engine.getWorld()->getObjectManager()->addObject(groundObject);
+    engine.getWorld()->getObjectManager()->addObject(atmosphereObject);
+    engine.getWorld()->getObjectManager()->addObject(ionosphereObject);
     
     // Create lightning strikes
     std::cout << "Generating lightning strikes..." << std::endl;
@@ -275,7 +279,8 @@ void runFirmamentBarrierDemo() {
     auto fieldManager = std::make_shared<FieldManager>();
     auto firmament = Electromagnetism::createFirmamentBarrier();
     fieldManager->addField(firmament);
-    engine.getWorld()->setFieldManager(fieldManager);
+    FieldManager* fieldManagerPtr = fieldManager.get();
+    engine.getWorld()->getFieldManager()->copyFrom(*fieldManagerPtr);
     
     // Visualize the firmament field
     visualizeField(*fieldManager, FieldType::Electric, -50.0f, 50.0f, 9989800.0f, 9990200.0f, 40, 20);
@@ -291,9 +296,9 @@ void runFirmamentBarrierDemo() {
     negativeCharge->setVelocity(Vector2(0.0f, 100.0f));
     
     // Add objects to world
-    engine.getWorld()->addObject(neutralBalloon);
-    engine.getWorld()->addObject(positiveCharge);
-    engine.getWorld()->addObject(negativeCharge);
+    engine.getWorld()->getObjectManager()->addObject(neutralBalloon);
+    engine.getWorld()->getObjectManager()->addObject(positiveCharge);
+    engine.getWorld()->getObjectManager()->addObject(negativeCharge);
     
     // Output header
     std::cout << std::fixed << std::setprecision(2);

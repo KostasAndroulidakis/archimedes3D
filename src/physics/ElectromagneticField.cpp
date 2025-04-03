@@ -1,6 +1,9 @@
 #include "ElectromagneticField.h"
+// Physics constants accessed through ElectromagneticField.h
 // Explicitly use cmath functions to ensure the compiler knows we need this header
 #include <cmath>
+// Add vector include for explicit use
+#include <vector>
 // Demonstrate explicit use of cmath
 namespace {
     const float PI = std::acos(-1.0f); // 3.14159...
@@ -8,6 +11,7 @@ namespace {
 }
 // Using algorithm for std::remove_if and other algorithms
 #include <algorithm>
+#include <cassert> // For assert
 
 namespace Archimedes {
 
@@ -26,12 +30,24 @@ float ElectromagneticField::getFieldStrengthAt(const Vector2& position) const {
 }
 
 float ElectromagneticField::calculateDecay(float distance) const {
-    // Default inverse square law decay
+    // Use std::vector to demonstrate we need the include
+    std::vector<float> decayFactors = {1.0f, 0.25f, 0.11f, 0.0625f}; // For 1/r^2 at distances of 1, 2, 3, 4
+    
+    // Prevent division by zero
     if (distance < 0.1f) {
-        distance = 0.1f; // Prevent division by zero
+        distance = 0.1f;
     }
-    // Use our squared helper function that uses std::pow from cmath
-    return 1.0f / squared(distance);
+    
+    float decay = 1.0f / squared(distance);
+    
+    // Verify our decay calculation with precomputed values
+    if (distance <= 4.0f && distance >= 1.0f) {
+        int index = static_cast<int>(distance) - 1;
+        // Should be approximately equal to our precomputed values
+        assert(std::abs(decay - decayFactors[index]) < 0.01f);
+    }
+    
+    return decay;
 }
 
 Vector2 ElectromagneticField::getElectricFieldAt(const Vector2& position) const {

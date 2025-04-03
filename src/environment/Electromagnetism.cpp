@@ -1,7 +1,16 @@
 #include "Electromagnetism.h"
+#include "../physics/Ionosphere.h"
+#include "../physics/PlasmaField.h"
+#include "../constants/AtmosphereConstants.h"
 #include <random>
 
 namespace Archimedes {
+
+std::shared_ptr<FieldManager> Electromagnetism::createStandardModel() {
+    auto fieldManager = std::make_shared<FieldManager>();
+    setupStandardModel(fieldManager);
+    return fieldManager;
+}
 
 void Electromagnetism::setupStandardModel(std::shared_ptr<FieldManager> fieldManager) {
     if (!fieldManager) {
@@ -37,8 +46,11 @@ std::shared_ptr<PointSourceField> Electromagnetism::createCentralField() {
 }
 
 std::shared_ptr<Ionosphere> Electromagnetism::createIonosphere() {
-    // Create ionosphere layer starting at 80km with 500km thickness
-    return std::make_shared<Ionosphere>(80000.0f, 500000.0f);
+    // Create ionosphere layer using constants
+    return std::make_shared<Ionosphere>(
+        Constants::Environment::Atmosphere::Ionosphere::LOWER_BOUNDARY,
+        Constants::Environment::Atmosphere::Ionosphere::UPPER_BOUNDARY
+    );
 }
 
 std::shared_ptr<PlasmaField> Electromagnetism::createAuroraField() {

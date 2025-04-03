@@ -1,13 +1,19 @@
 #include "../../src/core/Engine.h"
 #include "../../src/physics/PhysicsObject.h"
+#include "../../src/physics/ObjectFactory.h"
 #include "../../src/environment/Medium.h"
-#include "../../src/utils/Constants.h"
+#include "../../src/constants/MaterialConstants.h"
+#include "../../src/constants/SimulationConstants.h"
+#include "../../src/constants/EnvironmentConstants.h"
+#include "../DemoUtils.h"
 #include <iostream>
 #include <memory>
 #include <string>
-#include <iomanip>
+// <iomanip> now included through DemoUtils.h
+#include <vector>
 
 using namespace Archimedes;
+using namespace Archimedes::Demo;
 
 // Calculate densities from the mass and volume constants
 namespace TestObjects {
@@ -20,13 +26,6 @@ namespace TestObjects {
 constexpr float TIME_STEP = Constants::Simulation::DEMO_TIME_STEP;  // seconds
 constexpr int SIMULATION_STEPS = Constants::Simulation::DEFAULT_SIMULATION_STEPS;  // number of steps
 
-// Utility function for formatted output
-void printObjectState(const std::string& name, float density, const std::shared_ptr<PhysicsObject>& object) {
-    std::cout << "  " << std::left << std::setw(Constants::Simulation::OBJECT_NAME_WIDTH) << name + " (" + std::to_string(static_cast<int>(density + Constants::Simulation::DENSITY_ROUNDING_OFFSET)) + " kg/m³):";
-    std::cout << "y=" << std::fixed << std::setprecision(Constants::Simulation::OUTPUT_PRECISION_BUOYANCY) << object->getPosition().y;
-    std::cout << ", vel=" << std::fixed << std::setprecision(Constants::Simulation::OUTPUT_PRECISION_BUOYANCY) << object->getVelocity().y << std::endl;
-}
-
 // Simple console-based demo of buoyancy physics
 int main() {
     // Initialize engine
@@ -37,76 +36,40 @@ int main() {
     Medium air(Constants::Environment::Standard::AIR_DENSITY);
     Medium water(Constants::Environment::Standard::WATER_DENSITY);
     
-    // Create objects with different densities using constants
-    auto stone = std::make_shared<PhysicsObject>(
-        Constants::Materials::TestObjects::STONE_MASS, 
-        Constants::Materials::TestObjects::STONE_VOLUME, 
-        Vector2(Constants::Simulation::INITIAL_X_POSITION_OBJECT1, Constants::Simulation::INITIAL_Y_POSITION));
-        
-    auto wood = std::make_shared<PhysicsObject>(
-        Constants::Materials::TestObjects::WOOD_MASS, 
-        Constants::Materials::TestObjects::WOOD_VOLUME, 
-        Vector2(Constants::Simulation::INITIAL_X_POSITION_OBJECT2, Constants::Simulation::INITIAL_Y_POSITION));
-        
-    auto balloon = std::make_shared<PhysicsObject>(
-        Constants::Materials::TestObjects::BALLOON_MASS, 
-        Constants::Materials::TestObjects::BALLOON_VOLUME, 
-        Vector2(Constants::Simulation::INITIAL_X_POSITION_OBJECT3, Constants::Simulation::INITIAL_Y_POSITION));
-    
-    // Add objects to world
-    engine.getWorld()->addObject(stone);
-    engine.getWorld()->addObject(wood);
-    engine.getWorld()->addObject(balloon);
+    // Create objects with different densities using factory
+    auto objects = ObjectFactory::createStandardTestSet(engine.getWorld());    
+    auto& stone = objects[0];
+    auto& wood = objects[1];
+    auto& balloon = objects[2];
     
     // Demo in air
-    std::cout << "Simulating in air (density: " << Constants::Environment::Standard::AIR_DENSITY << " kg/m³):" << std::endl;
-    engine.getWorld()->setMedium(air);
+    printTableHeader("Simulation in Air");
+    std::cout << "Medium density: " << Constants::Environment::Standard::AIR_DENSITY << " kg/m³" << std::endl << std::endl;
+    engine.getWorld()->getMediumManager()->setMedium(air);
     
-    for (int i = 0; i < SIMULATION_STEPS; ++i) {
-        engine.step(TIME_STEP);
-        
-        std::cout << "Time: " << std::fixed << std::setprecision(Constants::Simulation::OUTPUT_PRECISION_TIME) << (i + 1) * TIME_STEP << "s" << std::endl;
-        printObjectState("Stone", TestObjects::STONE_DENSITY, stone);
-        printObjectState("Wood", TestObjects::WOOD_DENSITY, wood);
-        printObjectState("Balloon", TestObjects::BALLOON_DENSITY, balloon);
-        std::cout << std::endl;
-    }
+    // Define object names and densities vectors for the demo utility
+    std::vector<std::string> names = {"Stone", "Wood", "Balloon"};
+    std::vector<float> densities = {TestObjects::STONE_DENSITY, TestObjects::WOOD_DENSITY, TestObjects::BALLOON_DENSITY};
     
-    // Reset positions
-    stone = std::make_shared<PhysicsObject>(
-        Constants::Materials::TestObjects::STONE_MASS, 
-        Constants::Materials::TestObjects::STONE_VOLUME, 
-        Vector2(Constants::Simulation::INITIAL_X_POSITION_OBJECT1, Constants::Simulation::INITIAL_Y_POSITION));
-        
-    wood = std::make_shared<PhysicsObject>(
-        Constants::Materials::TestObjects::WOOD_MASS, 
-        Constants::Materials::TestObjects::WOOD_VOLUME, 
-        Vector2(Constants::Simulation::INITIAL_X_POSITION_OBJECT2, Constants::Simulation::INITIAL_Y_POSITION));
-        
-    balloon = std::make_shared<PhysicsObject>(
-        Constants::Materials::TestObjects::BALLOON_MASS, 
-        Constants::Materials::TestObjects::BALLOON_VOLUME, 
-        Vector2(Constants::Simulation::INITIAL_X_POSITION_OBJECT3, Constants::Simulation::INITIAL_Y_POSITION));
+    // Run simulation with the demo utility
+    runSimulation(engine, TIME_STEP, SIMULATION_STEPS, objects, names, densities);
     
-    // Clear world and add reset objects
+    // Reset positions and recreate objects
     engine.initialize();
-    engine.getWorld()->addObject(stone);
-    engine.getWorld()->addObject(wood);
-    engine.getWorld()->addObject(balloon);
+    objects = ObjectFactory::createStandardTestSet(engine.getWorld());
+    
+    // Get references to the newly created objects
+    stone = objects[0];
+    wood = objects[1];
+    balloon = objects[2];
     
     // Demo in water
-    std::cout << "Simulating in water (density: " << Constants::Environment::Standard::WATER_DENSITY << " kg/m³):" << std::endl;
-    engine.getWorld()->setMedium(water);
+    printTableHeader("Simulation in Water");
+    std::cout << "Medium density: " << Constants::Environment::Standard::WATER_DENSITY << " kg/m³" << std::endl << std::endl;
+    engine.getWorld()->getMediumManager()->setMedium(water);
     
-    for (int i = 0; i < SIMULATION_STEPS; ++i) {
-        engine.step(TIME_STEP);
-        
-        std::cout << "Time: " << std::fixed << std::setprecision(Constants::Simulation::OUTPUT_PRECISION_TIME) << (i + 1) * TIME_STEP << "s" << std::endl;
-        printObjectState("Stone", TestObjects::STONE_DENSITY, stone);
-        printObjectState("Wood", TestObjects::WOOD_DENSITY, wood);
-        printObjectState("Balloon", TestObjects::BALLOON_DENSITY, balloon);
-        std::cout << std::endl;
-    }
+    // Run simulation with same parameters
+    runSimulation(engine, TIME_STEP, SIMULATION_STEPS, objects, names, densities);
     
     return 0;
 }

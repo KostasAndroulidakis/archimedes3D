@@ -1,16 +1,20 @@
 #pragma once
 
 #include "../physics/ElectromagneticField.h"
-#include "../physics/PlasmaField.h"
 #include "../managers/FieldManager.h"
 #include <memory>
 
 namespace Archimedes {
 
+// Forward declarations
+class PlasmaField;
+class Ionosphere;
+
 // Factory class for creating electromagnetic fields
 class Electromagnetism {
 public:
     // Create standard electromagnetic model
+    static std::shared_ptr<FieldManager> createStandardModel();
     static void setupStandardModel(std::shared_ptr<FieldManager> fieldManager);
     
     // Create specific field types

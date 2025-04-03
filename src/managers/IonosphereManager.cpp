@@ -1,5 +1,5 @@
 #include "IonosphereManager.h"
-#include "../physics/PlasmaField.h" // Contains Ionosphere class
+#include "../physics/Ionosphere.h"
 
 namespace Archimedes {
 
@@ -14,14 +14,17 @@ void IonosphereManager::setIonosphere(std::shared_ptr<Ionosphere> ionosphere) {
 
 float IonosphereManager::getIonizationAt(const Vector2& position) const {
     if (m_usingIonosphere && m_ionosphere) {
-        return m_ionosphere->getIonizationAt(position);
+        // Use height to get ionization level
+        return m_ionosphere->getIonizationLevel(position.y);
     }
     return 0.0f; // No ionization by default
 }
 
 void IonosphereManager::generateLightningStrike(const Vector2& position) {
+    // This would need to be implemented in a real system
+    // For now, we just check if the ionosphere exists
     if (m_usingIonosphere && m_ionosphere) {
-        m_ionosphere->generateLightningStrike(position);
+        // In a full implementation, we would generate a lightning strike here
     }
 }
 

@@ -1,8 +1,8 @@
 #include "CompressibleObject.h"
 #include "Pressure.h"
 #include "../environment/Medium.h"
+// Physics constants accessed through Medium and Pressure includes
 #include <algorithm>
-// iostream include removed - not used
 
 namespace Archimedes {
 

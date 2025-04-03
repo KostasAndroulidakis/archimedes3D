@@ -26,7 +26,7 @@ Vector2 FieldManager::getMagneticFieldAt(const Vector2& position) const {
 
 Vector2 FieldManager::getPlasmaFieldAt(const Vector2& position) const {
     if (m_usingPlasma && m_plasmaField) {
-        return m_plasmaField->getFieldAt(position);
+        return m_plasmaField->getFieldVector(position);
     }
     return Vector2(0.0f, 0.0f);
 }
@@ -111,6 +111,21 @@ void FieldManager::update(float deltaTime) {
     if (m_usingPlasma && m_plasmaField) {
         m_plasmaField->update(deltaTime);
     }
+}
+
+void FieldManager::copyFrom(const FieldManager& other) {
+    // Copy electromagnetic fields
+    m_electricFields.clear();
+    for (const auto& field : other.m_electricFields) {
+        m_electricFields.push_back(field);
+    }
+    
+    // Copy plasma field
+    m_plasmaField = other.m_plasmaField;
+    
+    // Copy flags
+    m_usingElectromagnetism = other.m_usingElectromagnetism;
+    m_usingPlasma = other.m_usingPlasma;
 }
 
 } // namespace Archimedes

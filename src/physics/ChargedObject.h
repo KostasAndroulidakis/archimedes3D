@@ -1,8 +1,15 @@
 #pragma once
 
 #include "PhysicsObject.h"
-// ElectromagneticField.h is not directly needed in the header
-// Include it in the cpp file if needed
+
+// Forward declarations for constants
+namespace Archimedes {
+namespace Constants {
+namespace Physics {
+// Forward declarations if needed
+}
+}
+}
 
 namespace Archimedes {
 

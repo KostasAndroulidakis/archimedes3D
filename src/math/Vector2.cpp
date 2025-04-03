@@ -1,6 +1,6 @@
 #include "Vector2.h"
 #include <cmath>
-#include "../utils/Constants.h"
+#include "../constants/Constants.h"
 
 namespace Archimedes {
 

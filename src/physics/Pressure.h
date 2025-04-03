@@ -1,11 +1,13 @@
 #pragma once
 
+#include "../constants/EnvironmentConstants.h"
+
 namespace Archimedes {
 
 class Pressure {
 public:
     // Constants
-    static constexpr float STANDARD_ATMOSPHERIC_PRESSURE = 101325.0f; // Pa at sea level
+    static constexpr float STANDARD_ATMOSPHERIC_PRESSURE = Constants::Environment::Standard::ATMOSPHERIC_PRESSURE; // Pa at sea level
     
     // Calculate hydrostatic pressure at depth in fluid
     static float calculateHydrostaticPressure(float depth, float fluidDensity);

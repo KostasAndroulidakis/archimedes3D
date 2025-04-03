@@ -25,6 +25,8 @@ set(PHYSICS_SOURCES
     src/physics/ElectromagneticField.cpp
     src/physics/PlasmaField.cpp
     src/physics/Pressure.cpp
+    src/physics/Ionosphere.cpp
+    # BuoyancyCalculator.h and ObjectFactory.h are header-only files, no .cpp needed
 )
 
 # Environment sources

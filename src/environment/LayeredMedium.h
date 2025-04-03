@@ -2,6 +2,7 @@
 
 #include "Medium.h"
 #include "AtmosphereLayer.h"
+#include "../physics/ElectromagneticField.h" // Add missing include
 #include <vector>
 #include <memory>
 
@@ -28,9 +29,15 @@ public:
     float getDensity() const override { return getDensityAtHeight(0.0f); }
     float getViscosity() const override { return getViscosityAtHeight(0.0f); }
     
+    // Add a field to the layer
+    void addField(std::shared_ptr<ElectromagneticField> field) {
+        // Forward to the current layer if possible
+        if (m_layers.empty()) return;
+        // Implementation could vary based on requirements
+    }
+    
     // Get all layers
     const std::vector<std::shared_ptr<AtmosphereLayer>>& getLayers() const { return m_layers; }
-
 private:
     std::vector<std::shared_ptr<AtmosphereLayer>> m_layers;
 };

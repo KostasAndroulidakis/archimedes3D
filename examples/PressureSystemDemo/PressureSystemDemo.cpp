@@ -3,6 +3,7 @@
 #include "../../src/physics/ContainmentVessel.h"
 #include "../../src/physics/Pressure.h"
 #include "../../src/environment/Medium.h"
+// Use LayeredMedium.h which includes AtmosphereLayer.h
 #include "../../src/environment/Atmosphere.h"
 #include <iostream>
 #include <iomanip>

@@ -1,6 +1,7 @@
 #include "PhysicsObject.h"
 #include "../environment/Medium.h"
-#include "../utils/Constants.h"
+#include "../constants/Constants.h"
+#include "BuoyancyCalculator.h"
 #include <cmath>
 
 namespace Archimedes {
@@ -12,19 +13,16 @@ PhysicsObject::PhysicsObject(float mass, float volume, const Vector2& position)
 }
 
 void PhysicsObject::update(float deltaTime, const Medium& medium) {
-    // Calculate densities
+    // Calculate buoyancy force using the buoyancy calculator
+    Vector2 buoyancyForce = BuoyancyCalculator::calculateBuoyancyForce(m_mass, m_volume, medium);
+    
+    // Store the densities for later use in drag calculations
     float objectDensity = m_mass / m_volume;
     float mediumDensity = medium.getDensity();
-    
-    // Archimedes' principle: buoyant force = weight of displaced fluid
-    // Force = medium_density * volume * displacement_constant
-    const float displacementConstant = Constants::Physics::DISPLACEMENT_FACTOR;
-    
-    // Net force based on density difference (key principle of Archimedes engine)
-    // If object is less dense than medium -> upward force
-    // If object is more dense than medium -> downward force
     float densityDifference = objectDensity - mediumDensity;
-    Vector2 netForce(Constants::Physics::INITIAL_FORCE_X, densityDifference * m_volume * displacementConstant * Constants::Physics::FORCE_DIRECTION_INVERSION);
+    
+    // Initial net force is the buoyancy force
+    Vector2 netForce = buoyancyForce;
     
     // Add drag force based on velocity
     float dragCoefficient = Constants::Physics::STANDARD_DRAG_COEFFICIENT;
@@ -44,8 +42,8 @@ void PhysicsObject::update(float deltaTime, const Medium& medium) {
     // Calculate acceleration (F = ma, so a = F/m)
     Vector2 acceleration = m_force * (1.0f / m_mass);
     
-    // Terminal velocity calculation to prevent numerical issues
-    float terminalVelocity = std::sqrt((std::abs(densityDifference) * m_volume * displacementConstant) / 
+    // Terminal velocity calculation based on buoyancy and drag forces
+    float terminalVelocity = std::sqrt((std::abs(densityDifference) * m_volume * Constants::Physics::DENSITY_DIFFERENTIAL_FACTOR) / 
                                     (Constants::Simulation::DRAG_COEFFICIENT_FACTOR * dragCoefficient * mediumDensity * crossSectionalArea));
     
     if (terminalVelocity > Constants::Physics::MAX_TERMINAL_VELOCITY) {

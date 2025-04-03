@@ -1,7 +1,9 @@
 #include "../../src/core/Engine.h"
 #include "../../src/physics/PhysicsObject.h"
 #include "../../src/environment/Medium.h"
-#include "../../src/utils/Constants.h"
+// Not actually using AtmosphereLayer directly in this file
+//#include "../../src/environment/AtmosphereLayer.h"
+#include "../../src/constants/Constants.h"
 #include <iostream>
 #include <iomanip>
 #include <memory>
@@ -65,7 +67,7 @@ int main() {
     );
     
     // Add to world
-    engine.getWorld()->addObject(balloon);
+    engine.getWorld()->getObjectManager()->addObject(balloon);
     
     // Output setup
     std::cout << std::fixed << std::setprecision(Constants::Simulation::OUTPUT_PRECISION);
@@ -78,7 +80,7 @@ int main() {
     while (time <= Constants::Simulation::MAX_SIMULATION_TIME) {
         // Update medium density based on current height
         medium.updateForHeight(balloon->getPosition().y);
-        engine.getWorld()->setMedium(medium);
+        engine.getWorld()->getMediumManager()->setMedium(medium);
         
         // Run physics step
         engine.step(Constants::Simulation::DEFAULT_TIME_STEP);

@@ -2,8 +2,15 @@
 
 #include "../math/Vector2.h"
 #include "FieldTypes.h"
-#include <vector>
-#include <memory>
+
+// Forward declarations for constants
+namespace Archimedes {
+namespace Constants {
+namespace Physics {
+// Forward declarations if needed
+}
+}
+}
 
 namespace Archimedes {
 

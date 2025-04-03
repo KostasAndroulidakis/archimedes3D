@@ -2,7 +2,7 @@
 #include "../../src/physics/PhysicsObject.h"
 // Medium.h is included through LayeredMedium.h
 // #include "../../src/environment/Medium.h"
-#include "../../src/environment/LayeredMedium.h"
+#include "../../src/environment/LayeredMedium.h" // This already includes AtmosphereLayer.h
 #include "../../src/environment/Atmosphere.h"
 #include <iostream>
 #include <memory>
@@ -55,7 +55,7 @@ void simulateBalloonAscent(Engine& engine, std::shared_ptr<LayeredMedium> atmosp
     std::cout << std::endl;
     
     auto balloon = std::make_shared<PhysicsObject>(balloonMass, balloonVolume, Vector2(0.0f, 0.1f));
-    engine.getWorld()->addObject(balloon);
+    engine.getWorld()->getObjectManager()->addObject(balloon);
     
     std::cout << std::left << std::setw(10) << "Time (s)" 
               << std::setw(15) << "Height (m)" 
@@ -98,7 +98,7 @@ int main() {
     auto atmosphere = Atmosphere::createStandardModel();
     
     // Set the world to use the layered medium
-    engine.getWorld()->setLayeredMedium(atmosphere);
+    engine.getWorld()->getMediumManager()->setLayeredMedium(atmosphere);
     
     // Print atmosphere properties
     printAtmosphereProperties(atmosphere);

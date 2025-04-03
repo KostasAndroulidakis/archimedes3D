@@ -2,11 +2,11 @@
 
 #include <memory>
 #include "../math/Vector2.h"
+#include "../physics/Ionosphere.h"
 
 namespace Archimedes {
 
-// Forward declarations
-class Ionosphere;
+// Ionosphere class already included
 
 class IonosphereManager {
 public:

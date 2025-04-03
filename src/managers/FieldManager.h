@@ -37,6 +37,9 @@ public:
     // Update fields
     void update(float deltaTime);
     
+    // Copy data from another FieldManager
+    void copyFrom(const FieldManager& other);
+    
 private:
     std::vector<std::shared_ptr<ElectromagneticField>> m_electricFields;
     std::shared_ptr<PlasmaField> m_plasmaField;

@@ -2,6 +2,10 @@
 
 #include "PhysicsObject.h"
 #include "../environment/Medium.h"
+namespace Archimedes {
+// Forward declaration instead of including Pressure.h
+class Pressure;
+}
 #include <memory>
 #include <vector>
 

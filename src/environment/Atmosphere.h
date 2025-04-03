@@ -1,6 +1,7 @@
 #pragma once
 
 #include "LayeredMedium.h"
+#include <string>
 
 namespace Archimedes {
 
@@ -22,6 +23,19 @@ public:
     
     // Create a dome layer (firmament)
     static std::shared_ptr<AtmosphereLayer> createFirmament();
+    
+    // Generic method to create atmospheric layer from constants namespace
+    template<typename T>
+    static std::shared_ptr<AtmosphereLayer> createLayerFromConstants(const std::string& name) {
+        return std::make_shared<AtmosphereLayer>(
+            name,
+            T::DENSITY,
+            T::TEMPERATURE,
+            T::LOWER_BOUNDARY,
+            T::UPPER_BOUNDARY,
+            T::PRESSURE
+        );
+    }
 };
 
 } // namespace Archimedes

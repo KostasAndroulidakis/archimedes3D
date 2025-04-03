@@ -1,7 +1,13 @@
 #include "Atmosphere.h"
-#include "../utils/Constants.h"
+#include "../constants/Constants.h"
 
 namespace Archimedes {
+
+// Generic helper method to create an atmosphere layer
+std::shared_ptr<AtmosphereLayer> createGenericLayer(const std::string& name, float density, float temperature, 
+                                               float lowerBoundary, float upperBoundary, float pressure) {
+    return std::make_shared<AtmosphereLayer>(name, density, temperature, lowerBoundary, upperBoundary, pressure);
+}
 
 std::shared_ptr<LayeredMedium> Atmosphere::createStandardModel() {
     auto atmosphere = std::make_shared<LayeredMedium>();
@@ -19,7 +25,7 @@ std::shared_ptr<LayeredMedium> Atmosphere::createStandardModel() {
 
 std::shared_ptr<AtmosphereLayer> Atmosphere::createTroposphere() {
     // Troposphere: 0-12km, where weather occurs
-    return std::make_shared<AtmosphereLayer>(
+    return createGenericLayer(
         "Troposphere",
         Constants::Environment::Atmosphere::Troposphere::DENSITY,
         Constants::Environment::Atmosphere::Troposphere::TEMPERATURE,
@@ -31,7 +37,7 @@ std::shared_ptr<AtmosphereLayer> Atmosphere::createTroposphere() {
 
 std::shared_ptr<AtmosphereLayer> Atmosphere::createStratosphere() {
     // Stratosphere: 12-50km, contains ozone layer
-    return std::make_shared<AtmosphereLayer>(
+    return createGenericLayer(
         "Stratosphere",
         Constants::Environment::Atmosphere::Stratosphere::DENSITY,
         Constants::Environment::Atmosphere::Stratosphere::TEMPERATURE,
@@ -43,7 +49,7 @@ std::shared_ptr<AtmosphereLayer> Atmosphere::createStratosphere() {
 
 std::shared_ptr<AtmosphereLayer> Atmosphere::createMesosphere() {
     // Mesosphere: 50-85km, where meteors burn up
-    return std::make_shared<AtmosphereLayer>(
+    return createGenericLayer(
         "Mesosphere",
         Constants::Environment::Atmosphere::Mesosphere::DENSITY,
         Constants::Environment::Atmosphere::Mesosphere::TEMPERATURE,
@@ -55,7 +61,7 @@ std::shared_ptr<AtmosphereLayer> Atmosphere::createMesosphere() {
 
 std::shared_ptr<AtmosphereLayer> Atmosphere::createThermosphere() {
     // Thermosphere: 85-600km, where aurora occurs
-    return std::make_shared<AtmosphereLayer>(
+    return createGenericLayer(
         "Thermosphere",
         Constants::Environment::Atmosphere::Thermosphere::DENSITY,
         Constants::Environment::Atmosphere::Thermosphere::TEMPERATURE,
@@ -67,7 +73,7 @@ std::shared_ptr<AtmosphereLayer> Atmosphere::createThermosphere() {
 
 std::shared_ptr<AtmosphereLayer> Atmosphere::createExosphere() {
     // Exosphere: 600-10,000km, transitioning to vacuum
-    return std::make_shared<AtmosphereLayer>(
+    return createGenericLayer(
         "Exosphere",
         Constants::Environment::Atmosphere::Exosphere::DENSITY,
         Constants::Environment::Atmosphere::Exosphere::TEMPERATURE,
@@ -79,7 +85,7 @@ std::shared_ptr<AtmosphereLayer> Atmosphere::createExosphere() {
 
 std::shared_ptr<AtmosphereLayer> Atmosphere::createIonosphere() {
     // Ionosphere: 60-1000km, electrically charged layer (overlaps other layers)
-    return std::make_shared<AtmosphereLayer>(
+    return createGenericLayer(
         "Ionosphere",
         Constants::Environment::Atmosphere::Ionosphere::DENSITY,
         Constants::Environment::Atmosphere::Ionosphere::TEMPERATURE,
@@ -91,7 +97,7 @@ std::shared_ptr<AtmosphereLayer> Atmosphere::createIonosphere() {
 
 std::shared_ptr<AtmosphereLayer> Atmosphere::createFirmament() {
     // Firmament: The dome above
-    return std::make_shared<AtmosphereLayer>(
+    return createGenericLayer(
         "Firmament",
         Constants::Environment::Atmosphere::Firmament::DENSITY,
         Constants::Environment::Atmosphere::Firmament::TEMPERATURE,

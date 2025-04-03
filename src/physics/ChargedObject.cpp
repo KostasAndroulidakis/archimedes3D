@@ -1,5 +1,6 @@
 #include "ChargedObject.h"
 #include "../environment/Medium.h"
+// Using physics constants through Vector2 and Medium includes
 
 namespace Archimedes {
 
