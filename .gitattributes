@@ -1,0 +1,5 @@
+# Correctly identify file types
+CMakeLists.txt linguist-language=CMake
+*.cpp linguist-language=C++
+*.h linguist-language=C++
+
