@@ -1,9 +1,9 @@
 #include "../../src/core/Engine.h"
 #include "../../src/physics/PhysicsObject.h"
-// Medium.h is included through LayeredMedium.h
-// #include "../../src/environment/Medium.h"
 #include "../../src/environment/LayeredMedium.h" // This already includes AtmosphereLayer.h
 #include "../../src/environment/Atmosphere.h"
+#include "../../src/managers/ObjectManager.h"
+#include "../../src/managers/MediumManager.h"
 #include <iostream>
 #include <memory>
 #include <iomanip>

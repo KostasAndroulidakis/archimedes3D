@@ -5,6 +5,7 @@
 #include "../../src/constants/MaterialConstants.h"
 #include "../../src/constants/SimulationConstants.h"
 #include "../../src/constants/EnvironmentConstants.h"
+#include "../../src/managers/MediumManager.h"
 #include "../DemoUtils.h"
 #include <iostream>
 #include <memory>

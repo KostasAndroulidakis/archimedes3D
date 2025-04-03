@@ -18,6 +18,19 @@ World::World() {
 
 World::~World() = default;
 
+// Convenience methods that delegate to manager classes
+void World::setMedium(const Medium& medium) {
+    m_mediumManager->setMedium(medium);
+}
+
+void World::setLayeredMedium(std::shared_ptr<LayeredMedium> medium) {
+    m_mediumManager->setLayeredMedium(medium);
+}
+
+void World::addObject(std::shared_ptr<PhysicsObject> object) {
+    m_objectManager->addObject(object);
+}
+
 // Manager accessors
 ObjectManager* World::getObjectManager() const {
     return m_objectManager.get();

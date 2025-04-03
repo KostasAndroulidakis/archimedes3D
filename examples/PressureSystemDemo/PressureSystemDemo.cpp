@@ -5,16 +5,23 @@
 #include "../../src/environment/Medium.h"
 // Use LayeredMedium.h which includes AtmosphereLayer.h
 #include "../../src/environment/Atmosphere.h"
+// Forward declare the manager classes to avoid including headers directly
+namespace Archimedes {
+    class ObjectManager;
+    class MediumManager;
+}
 #include <iostream>
 #include <iomanip>
 #include <memory>
 #include <vector>
+#include <sstream>
 
 using namespace Archimedes;
 
 // Demo 1: Compressible objects at different depths
 void runCompressibleObjectsDemo() {
     std::cout << "\n=== Compressible Objects Demo ===\n" << std::endl;
+    std::cout.flush();
     
     Engine engine;
     engine.initialize();
@@ -42,6 +49,7 @@ void runCompressibleObjectsDemo() {
               << std::setw(15) << "High Comp. Vol."
               << std::endl;
     std::cout << std::string(70, '-') << std::endl;
+    std::cout.flush();
     
     // Simulate at different depths
     std::vector<float> depths = {0, 10, 20, 50, 100, 500, 1000};
@@ -60,18 +68,21 @@ void runCompressibleObjectsDemo() {
                          Pressure::calculateHydrostaticPressure(depth, water.getDensity());
         
         // Output results
-        std::cout << std::setw(10) << depth
-                  << std::setw(15) << pressure
-                  << std::setw(15) << incompressible->getVolume()
-                  << std::setw(15) << moderate->getVolume()
-                  << std::setw(15) << highlyCompressible->getVolume()
-                  << std::endl;
+        std::stringstream outLine;
+        outLine << std::setw(10) << depth
+                << std::setw(15) << pressure
+                << std::setw(15) << incompressible->getVolume()
+                << std::setw(15) << moderate->getVolume()
+                << std::setw(15) << highlyCompressible->getVolume();
+        std::cout << outLine.str() << std::endl;
+        std::cout.flush();
     }
 }
 
 // Demo 2: Containment vessels with different internal pressures
 void runContainmentVesselDemo() {
     std::cout << "\n=== Containment Vessel Demo ===\n" << std::endl;
+    std::cout.flush();
     
     Engine engine;
     engine.initialize();
@@ -124,6 +135,7 @@ void runContainmentVesselDemo() {
               << std::setw(15) << "High Ruptured"
               << std::endl;
     std::cout << std::string(100, '-') << std::endl;
+    std::cout.flush();
     
     // Simulate at different heights
     std::vector<float> heights = {0, 1000, 5000, 10000, 20000, 30000};
@@ -141,20 +153,23 @@ void runContainmentVesselDemo() {
         float externalPressure = atmosphere->getPressureAtHeight(height);
         
         // Output results
-        std::cout << std::setw(10) << height
-                  << std::setw(15) << externalPressure
-                  << std::setw(15) << balloonLow->getVolume()
-                  << std::setw(15) << balloonNormal->getVolume()
-                  << std::setw(15) << balloonHigh->getVolume()
-                  << std::setw(15) << (lowPressure->isRuptured() ? "Yes" : "No")
-                  << std::setw(15) << (highPressure->isRuptured() ? "Yes" : "No")
-                  << std::endl;
+        std::stringstream outLine;
+        outLine << std::setw(10) << height
+                << std::setw(15) << externalPressure
+                << std::setw(15) << balloonLow->getVolume()
+                << std::setw(15) << balloonNormal->getVolume()
+                << std::setw(15) << balloonHigh->getVolume()
+                << std::setw(15) << (lowPressure->isRuptured() ? "Yes" : "No")
+                << std::setw(15) << (highPressure->isRuptured() ? "Yes" : "No");
+        std::cout << outLine.str() << std::endl;
+        std::cout.flush();
     }
 }
 
 // Demo 3: Pressure-resistant deep-sea object
 void runDeepSeaDemo() {
     std::cout << "\n=== Deep Sea Pressure Demo ===\n" << std::endl;
+    std::cout.flush();
     
     Engine engine;
     engine.initialize();
@@ -187,6 +202,7 @@ void runDeepSeaDemo() {
               << std::setw(15) << "Std. Ruptured"
               << std::endl;
     std::cout << std::string(80, '-') << std::endl;
+    std::cout.flush();
     
     // Simulate at increasing depths
     std::vector<float> depths = {0, 10, 50, 100, 500, 1000, 5000, 10000};
@@ -204,13 +220,15 @@ void runDeepSeaDemo() {
                          Pressure::calculateHydrostaticPressure(depth, ocean.getDensity());
         
         // Output results
-        std::cout << std::setw(10) << depth
-                  << std::setw(15) << pressure
-                  << std::setw(15) << submarine->getVolume()
-                  << std::setw(15) << standardVessel->getVolume()
-                  << std::setw(15) << (submarine->isRuptured() ? "Yes" : "No")
-                  << std::setw(15) << (standardVessel->isRuptured() ? "Yes" : "No")
-                  << std::endl;
+        std::stringstream outLine;
+        outLine << std::setw(10) << depth
+                << std::setw(15) << pressure
+                << std::setw(15) << submarine->getVolume()
+                << std::setw(15) << standardVessel->getVolume()
+                << std::setw(15) << (submarine->isRuptured() ? "Yes" : "No")
+                << std::setw(15) << (standardVessel->isRuptured() ? "Yes" : "No");
+        std::cout << outLine.str() << std::endl;
+        std::cout.flush();
     }
 }
 

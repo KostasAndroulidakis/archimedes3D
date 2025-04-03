@@ -4,10 +4,13 @@
 // Not actually using AtmosphereLayer directly in this file
 //#include "../../src/environment/AtmosphereLayer.h"
 #include "../../src/constants/Constants.h"
+#include "../../src/managers/ObjectManager.h"
+#include "../../src/managers/MediumManager.h"
 #include <iostream>
 #include <iomanip>
 #include <memory>
 #include <cmath>
+#include <sstream>
 
 using namespace Archimedes;
 
@@ -85,27 +88,34 @@ int main() {
         // Run physics step
         engine.step(Constants::Simulation::DEFAULT_TIME_STEP);
         
-        // Output
-        if (time >= nextOutput) {
-            Vector2 position = balloon->getPosition();
-            Vector2 velocity = balloon->getVelocity();
-            float airDensity = atmosphere.getDensityAtHeight(position.y);
-            
-            std::cout << std::setw(Constants::Simulation::TIME_COLUMN_WIDTH) << time 
-                     << std::setw(Constants::Simulation::POSITION_COLUMN_WIDTH) << position.y 
-                     << std::setw(Constants::Simulation::VELOCITY_COLUMN_WIDTH) << velocity.y 
-                     << std::setw(Constants::Simulation::DENSITY_COLUMN_WIDTH) << airDensity << std::endl;
-            
-            nextOutput += Constants::Simulation::OUTPUT_INTERVAL;
-        }
+    // Output
+    if (time >= nextOutput) {
+        Vector2 position = balloon->getPosition();
+        Vector2 velocity = balloon->getVelocity();
+        float airDensity = atmosphere.getDensityAtHeight(position.y);
+        
+        // Create output line
+        std::stringstream outputLine;
+        outputLine << std::setw(Constants::Simulation::TIME_COLUMN_WIDTH) << time 
+                  << std::setw(Constants::Simulation::POSITION_COLUMN_WIDTH) << position.y 
+                  << std::setw(Constants::Simulation::VELOCITY_COLUMN_WIDTH) << velocity.y 
+                  << std::setw(Constants::Simulation::DENSITY_COLUMN_WIDTH) << airDensity;
+        
+        // Output to console and flush immediately
+        std::cout << outputLine.str() << std::endl;
+        std::cout.flush();
+        
+        nextOutput += Constants::Simulation::OUTPUT_INTERVAL;
+    }
         
         time += Constants::Simulation::DEFAULT_TIME_STEP;
         
-        // Early exit if high enough
-        if (balloon->getPosition().y > Constants::Simulation::MAX_ALTITUDE) {
-            std::cout << "Balloon reached " << Constants::Simulation::MAX_ALTITUDE / Constants::Simulation::KILOMETERS_CONVERSION << "km altitude." << std::endl;
-            break;
-        }
+    // Early exit if high enough
+    if (balloon->getPosition().y > Constants::Simulation::MAX_ALTITUDE) {
+        std::cout << "Balloon reached " << Constants::Simulation::MAX_ALTITUDE / Constants::Simulation::KILOMETERS_CONVERSION << "km altitude." << std::endl;
+        std::cout.flush();
+        break;
+    }
     }
     
     return 0;

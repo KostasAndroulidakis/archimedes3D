@@ -6,11 +6,16 @@
 #include "../../src/environment/Electromagnetism.h"
 // Use LayeredMedium.h which includes AtmosphereLayer.h
 #include "../../src/environment/Atmosphere.h"
+#include "../../src/managers/ObjectManager.h"
+#include "../../src/managers/MediumManager.h"
+#include "../../src/managers/FieldManager.h"
+#include "../../src/managers/IonosphereManager.h"
 #include <iostream>
 #include <iomanip>
 #include <memory>
 #include <string>
 #include <cmath>
+#include <sstream>
 
 using namespace Archimedes;
 
@@ -20,6 +25,7 @@ void visualizeField(const FieldManager& fieldManager, FieldType fieldType,
     std::cout << "=== " << (fieldType == FieldType::Electric ? "Electric" : 
                           fieldType == FieldType::Magnetic ? "Magnetic" : "Plasma")
               << " Field Visualization ===" << std::endl;
+    std::cout.flush();
     
     std::vector<std::vector<char>> grid(height, std::vector<char>(width, ' '));
     
@@ -111,13 +117,16 @@ void visualizeField(const FieldManager& fieldManager, FieldType fieldType,
             std::cout << c;
         }
         std::cout << std::endl;
+        std::cout.flush();
     }
     std::cout << std::endl;
+    std::cout.flush();
 }
 
 // Demo 1: Charged objects in electromagnetic field
 void runChargedObjectsDemo() {
     std::cout << "\n=== Charged Objects Demo ===\n" << std::endl;
+    std::cout.flush();
     
     Engine engine;
     engine.initialize();
@@ -166,6 +175,7 @@ void runChargedObjectsDemo() {
               << std::setw(20) << "Neutral Object Pos"
               << std::endl;
     std::cout << std::string(70, '-') << std::endl;
+    std::cout.flush();
     
     // Run simulation for several seconds
     float timeStep = 0.1f;
@@ -175,20 +185,23 @@ void runChargedObjectsDemo() {
         engine.step(timeStep);
         
         // Output positions
-        std::cout << std::setw(10) << time
-                  << std::setw(20) << ("(" + std::to_string(positiveCharge->getPosition().x) + ", " + 
-                                       std::to_string(positiveCharge->getPosition().y) + ")")
-                  << std::setw(20) << ("(" + std::to_string(negativeCharge->getPosition().x) + ", " + 
-                                       std::to_string(negativeCharge->getPosition().y) + ")")
-                  << std::setw(20) << ("(" + std::to_string(neutralObject->getPosition().x) + ", " + 
-                                       std::to_string(neutralObject->getPosition().y) + ")")
-                  << std::endl;
+        std::stringstream outLine;
+        outLine << std::setw(10) << time
+                << std::setw(20) << ("(" + std::to_string(positiveCharge->getPosition().x) + ", " + 
+                                     std::to_string(positiveCharge->getPosition().y) + ")")
+                << std::setw(20) << ("(" + std::to_string(negativeCharge->getPosition().x) + ", " + 
+                                     std::to_string(negativeCharge->getPosition().y) + ")")
+                << std::setw(20) << ("(" + std::to_string(neutralObject->getPosition().x) + ", " + 
+                                     std::to_string(neutralObject->getPosition().y) + ")");
+        std::cout << outLine.str() << std::endl;
+        std::cout.flush();
     }
 }
 
 // Demo 2: Lightning and plasma effects
 void runPlasmaDemo() {
     std::cout << "\n=== Plasma and Lightning Demo ===\n" << std::endl;
+    std::cout.flush();
     
     Engine engine;
     engine.initialize();
@@ -225,6 +238,7 @@ void runPlasmaDemo() {
     
     // Create lightning strikes
     std::cout << "Generating lightning strikes..." << std::endl;
+    std::cout.flush();
     auto lightning1 = Electromagnetism::createLightningStrike(Vector2(-5000.0f, 0.0f));
     auto lightning2 = Electromagnetism::createLightningStrike(Vector2(5000.0f, 0.0f));
     
@@ -241,6 +255,7 @@ void runPlasmaDemo() {
               << std::setw(15) << "Lightning 2"
               << std::endl;
     std::cout << std::string(90, '-') << std::endl;
+    std::cout.flush();
     
     // Run simulation
     float timeStep = 0.1f;
@@ -255,22 +270,25 @@ void runPlasmaDemo() {
         bool lightning2Active = lightning2->isActive();
         
         // Output
-        std::cout << std::setw(10) << time
-                  << std::setw(20) << ("(" + std::to_string(groundObject->getPosition().x) + ", " + 
-                                       std::to_string(groundObject->getPosition().y) + ")")
-                  << std::setw(20) << ("(" + std::to_string(atmosphereObject->getPosition().x) + ", " + 
-                                       std::to_string(atmosphereObject->getPosition().y) + ")")
-                  << std::setw(20) << ("(" + std::to_string(ionosphereObject->getPosition().x) + ", " + 
-                                       std::to_string(ionosphereObject->getPosition().y) + ")")
-                  << std::setw(15) << (lightning1Active ? "Active" : "Inactive")
-                  << std::setw(15) << (lightning2Active ? "Active" : "Inactive")
-                  << std::endl;
+        std::stringstream outLine;
+        outLine << std::setw(10) << time
+                << std::setw(20) << ("(" + std::to_string(groundObject->getPosition().x) + ", " + 
+                                     std::to_string(groundObject->getPosition().y) + ")")
+                << std::setw(20) << ("(" + std::to_string(atmosphereObject->getPosition().x) + ", " + 
+                                     std::to_string(atmosphereObject->getPosition().y) + ")")
+                << std::setw(20) << ("(" + std::to_string(ionosphereObject->getPosition().x) + ", " + 
+                                     std::to_string(ionosphereObject->getPosition().y) + ")")
+                << std::setw(15) << (lightning1Active ? "Active" : "Inactive")
+                << std::setw(15) << (lightning2Active ? "Active" : "Inactive");
+        std::cout << outLine.str() << std::endl;
+        std::cout.flush();
     }
 }
 
 // Demo 3: Firmament barrier
 void runFirmamentBarrierDemo() {
     std::cout << "\n=== Firmament Barrier Demo ===\n" << std::endl;
+    std::cout.flush();
     
     Engine engine;
     engine.initialize();
@@ -311,6 +329,7 @@ void runFirmamentBarrierDemo() {
               << std::setw(20) << "Vel (negative)"
               << std::endl;
     std::cout << std::string(120, '-') << std::endl;
+    std::cout.flush();
     
     // Run simulation
     float timeStep = 0.1f;
@@ -321,14 +340,16 @@ void runFirmamentBarrierDemo() {
         engine.step(timeStep);
         
         // Output heights and velocities
-        std::cout << std::setw(10) << time
-                  << std::setw(20) << neutralBalloon->getPosition().y
-                  << std::setw(20) << positiveCharge->getPosition().y
-                  << std::setw(20) << negativeCharge->getPosition().y
-                  << std::setw(20) << neutralBalloon->getVelocity().y
-                  << std::setw(20) << positiveCharge->getVelocity().y
-                  << std::setw(20) << negativeCharge->getVelocity().y
-                  << std::endl;
+        std::stringstream outLine;
+        outLine << std::setw(10) << time
+                << std::setw(20) << neutralBalloon->getPosition().y
+                << std::setw(20) << positiveCharge->getPosition().y
+                << std::setw(20) << negativeCharge->getPosition().y
+                << std::setw(20) << neutralBalloon->getVelocity().y
+                << std::setw(20) << positiveCharge->getVelocity().y
+                << std::setw(20) << negativeCharge->getVelocity().y;
+        std::cout << outLine.str() << std::endl;
+        std::cout.flush();
     }
 }
 

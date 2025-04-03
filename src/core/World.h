@@ -33,6 +33,11 @@ public:
     FieldManager* getFieldManager() const;
     IonosphereManager* getIonosphereManager() const;
     
+    // Convenience methods that delegate to manager classes
+    void setMedium(const Medium& medium);
+    void setLayeredMedium(std::shared_ptr<LayeredMedium> medium);
+    void addObject(std::shared_ptr<PhysicsObject> object);
+    
     // Query methods for world properties at a position
     float getDensityAtPosition(const Vector2& position) const;
     float getViscosityAtPosition(const Vector2& position) const;
