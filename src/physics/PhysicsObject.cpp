@@ -6,7 +6,9 @@
 namespace Archimedes {
 
 PhysicsObject::PhysicsObject(float mass, float volume, const Vector2& position)
-    : m_mass(mass), m_volume(volume), m_position(position), m_velocity(0.0f, 0.0f), m_force(0.0f, 0.0f) {
+    : m_mass(mass), m_volume(volume), m_position(position), 
+      m_velocity(Constants::Physics::INITIAL_VELOCITY_X, Constants::Physics::INITIAL_VELOCITY_Y), 
+      m_force(Constants::Physics::INITIAL_FORCE_X, Constants::Physics::INITIAL_FORCE_Y) {
 }
 
 void PhysicsObject::update(float deltaTime, const Medium& medium) {
@@ -22,16 +24,16 @@ void PhysicsObject::update(float deltaTime, const Medium& medium) {
     // If object is less dense than medium -> upward force
     // If object is more dense than medium -> downward force
     float densityDifference = objectDensity - mediumDensity;
-    Vector2 netForce(0.0f, -densityDifference * m_volume * displacementConstant);
+    Vector2 netForce(Constants::Physics::INITIAL_FORCE_X, densityDifference * m_volume * displacementConstant * Constants::Physics::FORCE_DIRECTION_INVERSION);
     
     // Add drag force based on velocity
     float dragCoefficient = Constants::Physics::STANDARD_DRAG_COEFFICIENT;
-    float crossSectionalArea = std::pow(m_volume, 2.0f/3.0f); // Approximation
+    float crossSectionalArea = std::pow(m_volume, Constants::Physics::VOLUME_TO_AREA_EXPONENT); // Approximation
     float dragFactor = Constants::Simulation::DRAG_COEFFICIENT_FACTOR * mediumDensity * dragCoefficient * crossSectionalArea;
     
     float velocityMagnitude = m_velocity.magnitude();
     if (velocityMagnitude > Constants::Physics::VELOCITY_THRESHOLD) {
-        Vector2 dragDirection = m_velocity * (-1.0f / velocityMagnitude);
+        Vector2 dragDirection = m_velocity * (Constants::Physics::FORCE_DIRECTION_INVERSION / velocityMagnitude);
         Vector2 dragForce = dragDirection * dragFactor * velocityMagnitude * velocityMagnitude;
         netForce += dragForce;
     }
@@ -62,10 +64,10 @@ void PhysicsObject::update(float deltaTime, const Medium& medium) {
     Vector2 newPosition = m_position + m_velocity * deltaTime;
     
     // Ensure objects don't go below ground level
-    if (newPosition.y < 0.0f) {
-        newPosition.y = 0.0f;
+    if (newPosition.y < Constants::Physics::GROUND_LEVEL) {
+        newPosition.y = Constants::Physics::GROUND_LEVEL;
         // If hitting ground, reverse/dampen vertical velocity
-        if (m_velocity.y < 0.0f) {
+        if (m_velocity.y < Constants::Physics::GROUND_LEVEL) {
             m_velocity.y = -m_velocity.y * Constants::Physics::VELOCITY_DAMPENING;
         }
     }

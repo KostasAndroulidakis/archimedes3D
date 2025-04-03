@@ -9,16 +9,7 @@
 
 using namespace Archimedes;
 
-// Atmosphere constants for balloon test
-namespace BalloonTestConstants {
-    constexpr float AIR_SCALE_HEIGHT = 8000.0f;  // m - height at which density is reduced by factor e
-    constexpr float BALLOON_VOLUME = 100.0f;     // m³
-    constexpr float BALLOON_MASS = 10.0f;        // kg
-    constexpr float TIME_STEP = 0.01f;           // s
-    constexpr float OUTPUT_INTERVAL = 2.0f;      // s
-    constexpr float MAX_SIMULATION_TIME = 60.0f; // s
-    constexpr float MAX_ALTITUDE = 10000.0f;     // m
-}
+// Using constants from the Constants namespace
 
 // Simple atmosphere with exponential density profile
 class SimpleAtmosphere : public Medium {
@@ -27,11 +18,11 @@ public:
     
     float getDensityAtHeight(float height) const {
         return Constants::Environment::Standard::AIR_DENSITY * 
-               std::exp(-height / BalloonTestConstants::AIR_SCALE_HEIGHT);
+               std::exp(-height / Constants::Environment::AIR_SCALE_HEIGHT);
     }
     
     float getDensity() const override {
-        return getDensityAtHeight(0.0f);
+        return getDensityAtHeight(Constants::Environment::INITIAL_HEIGHT);
     }
     
     float getViscosity() const override {
@@ -42,7 +33,7 @@ public:
 class DynamicMedium : public Medium {
 public:
     DynamicMedium(SimpleAtmosphere& atm) 
-        : Medium(atm.getDensity()), m_atmosphere(atm), m_height(0) {}
+        : Medium(atm.getDensity()), m_atmosphere(atm), m_height(Constants::Environment::DYNAMIC_MEDIUM_INITIAL_HEIGHT) {}
     
     void updateForHeight(float height) {
         m_height = height;
@@ -68,29 +59,29 @@ int main() {
     
     // Create balloon (lighter than air)
     auto balloon = std::make_shared<PhysicsObject>(
-        BalloonTestConstants::BALLOON_MASS, 
-        BalloonTestConstants::BALLOON_VOLUME, 
-        Vector2(0.0f, 0.5f)
+        Constants::Materials::TestObjects::LARGE_BALLOON_MASS, 
+        Constants::Materials::TestObjects::LARGE_BALLOON_VOLUME, 
+        Vector2(Constants::Simulation::INITIAL_X_POSITION_OBJECT1, Constants::Simulation::BALLOON_INITIAL_Y_POSITION)
     );
     
     // Add to world
     engine.getWorld()->addObject(balloon);
     
     // Output setup
-    std::cout << std::fixed << std::setprecision(2);
+    std::cout << std::fixed << std::setprecision(Constants::Simulation::OUTPUT_PRECISION);
     std::cout << "Time (s)  Height (m)     Velocity (m/s)  Air Density (kg/m³)" << std::endl;
-    std::cout << std::string(65, '-') << std::endl;
+    std::cout << std::string(Constants::Simulation::OUTPUT_TABLE_WIDTH, '-') << std::endl;
     
-    float time = 0.0f;
-    float nextOutput = 0.0f;
+    float time = Constants::Simulation::INITIAL_TIME;
+    float nextOutput = Constants::Simulation::INITIAL_OUTPUT_TIME;
     
-    while (time <= BalloonTestConstants::MAX_SIMULATION_TIME) {
+    while (time <= Constants::Simulation::MAX_SIMULATION_TIME) {
         // Update medium density based on current height
         medium.updateForHeight(balloon->getPosition().y);
         engine.getWorld()->setMedium(medium);
         
         // Run physics step
-        engine.step(BalloonTestConstants::TIME_STEP);
+        engine.step(Constants::Simulation::DEFAULT_TIME_STEP);
         
         // Output
         if (time >= nextOutput) {
@@ -98,19 +89,19 @@ int main() {
             Vector2 velocity = balloon->getVelocity();
             float airDensity = atmosphere.getDensityAtHeight(position.y);
             
-            std::cout << std::setw(10) << time 
-                     << std::setw(15) << position.y 
-                     << std::setw(15) << velocity.y 
-                     << std::setw(15) << airDensity << std::endl;
+            std::cout << std::setw(Constants::Simulation::TIME_COLUMN_WIDTH) << time 
+                     << std::setw(Constants::Simulation::POSITION_COLUMN_WIDTH) << position.y 
+                     << std::setw(Constants::Simulation::VELOCITY_COLUMN_WIDTH) << velocity.y 
+                     << std::setw(Constants::Simulation::DENSITY_COLUMN_WIDTH) << airDensity << std::endl;
             
-            nextOutput += BalloonTestConstants::OUTPUT_INTERVAL;
+            nextOutput += Constants::Simulation::OUTPUT_INTERVAL;
         }
         
-        time += BalloonTestConstants::TIME_STEP;
+        time += Constants::Simulation::DEFAULT_TIME_STEP;
         
         // Early exit if high enough
-        if (balloon->getPosition().y > BalloonTestConstants::MAX_ALTITUDE) {
-            std::cout << "Balloon reached " << BalloonTestConstants::MAX_ALTITUDE / 1000.0f << "km altitude." << std::endl;
+        if (balloon->getPosition().y > Constants::Simulation::MAX_ALTITUDE) {
+            std::cout << "Balloon reached " << Constants::Simulation::MAX_ALTITUDE / Constants::Simulation::KILOMETERS_CONVERSION << "km altitude." << std::endl;
             break;
         }
     }

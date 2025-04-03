@@ -1,5 +1,6 @@
 #include "Vector2.h"
 #include <cmath>
+#include "../utils/Constants.h"
 
 namespace Archimedes {
 
@@ -9,7 +10,7 @@ float Vector2::magnitude() const {
 
 Vector2 Vector2::normalized() const {
     float mag = magnitude();
-    if (mag > 0.0f) {
+    if (mag > Constants::Physics::EPSILON) {
         return Vector2(x / mag, y / mag);
     }
     return Vector2();
