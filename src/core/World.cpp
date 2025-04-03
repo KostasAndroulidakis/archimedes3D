@@ -8,7 +8,6 @@
 #include "../managers/MediumManager.h"
 #include "../managers/FieldManager.h"
 #include "../managers/IonosphereManager.h"
-#include <random>
 
 namespace Archimedes {
 
@@ -89,7 +88,8 @@ void World::generateLightningStrike(const Vector2& position) {
 }
 
 void World::update(float deltaTime) {
-    // First update all specialized systems
+    // Update all field systems first
+    m_fieldManager->update(deltaTime);
     m_ionosphereManager->update(deltaTime);
     
     // Apply electromagnetic forces to objects
@@ -97,7 +97,7 @@ void World::update(float deltaTime) {
         m_fieldManager->applyElectromagneticForces(object);
     }
     
-    // Now update physics for each object using the current medium
+    // Create a medium for each object based on its position and update
     for (const auto& object : m_objectManager->getObjects()) {
         Vector2 position = object->getPosition();
         

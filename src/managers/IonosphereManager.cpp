@@ -1,5 +1,5 @@
 #include "IonosphereManager.h"
-#include "../physics/PlasmaField.h" // Assuming Ionosphere is defined here
+#include "../physics/PlasmaField.h" // Contains Ionosphere class
 
 namespace Archimedes {
 

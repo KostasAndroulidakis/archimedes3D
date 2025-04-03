@@ -1,4 +1,5 @@
 #include "MediumManager.h"
+#include "../utils/Constants.h"
 
 namespace Archimedes {
 
@@ -19,28 +20,28 @@ void MediumManager::setLayeredMedium(std::shared_ptr<LayeredMedium> medium) {
 
 float MediumManager::getDensityAtPosition(const Vector2& position) const {
     if (m_usingLayeredMedium && m_layeredMedium) {
-        return m_layeredMedium->getDensityAtPosition(position);
+        return m_layeredMedium->getDensityAtHeight(position.y);
     }
     return m_uniformMedium.getDensity();
 }
 
 float MediumManager::getViscosityAtPosition(const Vector2& position) const {
     if (m_usingLayeredMedium && m_layeredMedium) {
-        return m_layeredMedium->getViscosityAtPosition(position);
+        return m_layeredMedium->getViscosityAtHeight(position.y);
     }
     return m_uniformMedium.getViscosity();
 }
 
 float MediumManager::getPressureAtPosition(const Vector2& position) const {
     if (m_usingLayeredMedium && m_layeredMedium) {
-        return m_layeredMedium->getPressureAtPosition(position);
+        return m_layeredMedium->getPressureAtHeight(position.y);
     }
     return Constants::Environment::Standard::ATMOSPHERIC_PRESSURE; // Default value
 }
 
 float MediumManager::getTemperatureAtPosition(const Vector2& position) const {
     if (m_usingLayeredMedium && m_layeredMedium) {
-        return m_layeredMedium->getTemperatureAtPosition(position);
+        return m_layeredMedium->getTemperatureAtHeight(position.y);
     }
     return Constants::Environment::Standard::STANDARD_TEMPERATURE; // Default value
 }

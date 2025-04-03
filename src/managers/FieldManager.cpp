@@ -1,6 +1,8 @@
 #include "FieldManager.h"
 #include "../physics/PhysicsObject.h"
 #include "../physics/ChargedObject.h"
+#include "../physics/ElectromagneticField.h"
+#include "../physics/PlasmaField.h"
 
 namespace Archimedes {
 
@@ -9,18 +11,17 @@ FieldManager::FieldManager()
       m_usingPlasma(false) {
 }
 
+void FieldManager::addField(std::shared_ptr<ElectromagneticField> field) {
+    m_electricFields.push_back(field);
+    m_usingElectromagnetism = true;
+}
+
 Vector2 FieldManager::getElectricFieldAt(const Vector2& position) const {
-    if (m_usingElectromagnetism && m_electromagneticField) {
-        return m_electromagneticField->getElectricFieldAt(position);
-    }
-    return Vector2(0.0f, 0.0f);
+    return getNetFieldVector(position, FieldType::Electric);
 }
 
 Vector2 FieldManager::getMagneticFieldAt(const Vector2& position) const {
-    if (m_usingElectromagnetism && m_electromagneticField) {
-        return m_electromagneticField->getMagneticFieldAt(position);
-    }
-    return Vector2(0.0f, 0.0f);
+    return getNetFieldVector(position, FieldType::Magnetic);
 }
 
 Vector2 FieldManager::getPlasmaFieldAt(const Vector2& position) const {
@@ -30,8 +31,30 @@ Vector2 FieldManager::getPlasmaFieldAt(const Vector2& position) const {
     return Vector2(0.0f, 0.0f);
 }
 
+Vector2 FieldManager::getNetFieldVector(const Vector2& position, FieldType type) const {
+    Vector2 netField(0.0f, 0.0f);
+    
+    // Sum contributions from all electromagnetic fields
+    if (m_usingElectromagnetism) {
+        for (const auto& field : m_electricFields) {
+            switch (type) {
+                case FieldType::Electric:
+                    netField += field->getElectricFieldAt(position);
+                    break;
+                case FieldType::Magnetic:
+                    netField += field->getMagneticFieldAt(position);
+                    break;
+                default:
+                    break;
+            }
+        }
+    }
+    
+    return netField;
+}
+
 void FieldManager::applyElectromagneticForces(std::shared_ptr<PhysicsObject> object) {
-    if (!m_usingElectromagnetism || !m_electromagneticField) {
+    if (!m_usingElectromagnetism) {
         return;
     }
     
@@ -66,13 +89,28 @@ void FieldManager::applyElectromagneticForces(std::shared_ptr<PhysicsObject> obj
 }
 
 void FieldManager::setElectromagneticField(std::shared_ptr<ElectromagneticField> field) {
-    m_electromagneticField = field;
+    m_electricFields.clear();
+    m_electricFields.push_back(field);
     m_usingElectromagnetism = true;
 }
 
 void FieldManager::setPlasmaField(std::shared_ptr<PlasmaField> field) {
     m_plasmaField = field;
     m_usingPlasma = true;
+}
+
+void FieldManager::update(float deltaTime) {
+    // Update all electromagnetic fields
+    if (m_usingElectromagnetism) {
+        for (auto& field : m_electricFields) {
+            field->update(deltaTime);
+        }
+    }
+    
+    // Update plasma field
+    if (m_usingPlasma && m_plasmaField) {
+        m_plasmaField->update(deltaTime);
+    }
 }
 
 } // namespace Archimedes

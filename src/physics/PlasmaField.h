@@ -1,6 +1,7 @@
 #pragma once
 
 #include "ElectromagneticField.h"
+#include "FieldTypes.h"
 #include <vector>
 
 namespace Archimedes {
@@ -14,7 +15,7 @@ enum class DischargeType {
 };
 
 // Class for modeling plasma phenomena
-class PlasmaField : public ElectromagneticField {
+class PlasmaField {
 public:
     PlasmaField(float strength, const Vector2& center, float radius);
     
@@ -32,9 +33,9 @@ public:
     void setIonizationLevel(float level) { m_ionizationLevel = level; }
     void setDischargeType(DischargeType type) { m_dischargeType = type; }
     
-    // Override field methods
-    Vector2 getFieldVector(const Vector2& position) const override;
-    float getFieldStrengthAt(const Vector2& position) const override;
+    // Get field at position
+    Vector2 getFieldAt(const Vector2& position) const;
+    float getFieldStrengthAt(const Vector2& position) const;
     
     // Calculate ionization effect at position
     float getIonizationAt(const Vector2& position) const;
@@ -48,6 +49,7 @@ public:
     
 private:
     Vector2 m_center;           // Center of plasma field
+    float m_strength;           // Field strength
     float m_radius;             // Radius of influence
     float m_temperature;        // Temperature in Kelvin
     float m_ionizationLevel;    // Level of ionization (0-1)
@@ -78,8 +80,7 @@ public:
     float getIonizationAt(const Vector2& position) const;
     
     // Create a lightning discharge in the ionosphere
-    std::shared_ptr<LightningField> generateLightning(
-        const Vector2& start, const Vector2& end, float strength);
+    void generateLightningStrike(const Vector2& position);
     
     // Add plasma discharge
     void addPlasmaField(std::shared_ptr<PlasmaField> plasma);

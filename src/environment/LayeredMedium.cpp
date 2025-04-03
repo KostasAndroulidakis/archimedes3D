@@ -1,11 +1,11 @@
 #include "LayeredMedium.h"
-// stdexcept is not directly used
 #include <algorithm>
+#include "../utils/Constants.h"
 
 namespace Archimedes {
 
 LayeredMedium::LayeredMedium() 
-    : Medium(1.2f) { // Default to standard air density
+    : Medium(Constants::Environment::Standard::AIR_DENSITY) { // Default to standard air density
 }
 
 void LayeredMedium::addLayer(std::shared_ptr<AtmosphereLayer> layer) {
@@ -56,7 +56,7 @@ float LayeredMedium::getPressureAtHeight(float height) const {
     if (layer) {
         return layer->getPressureAtHeight(height);
     }
-    return 101325.0f; // Standard atmospheric pressure as fallback
+    return Constants::Environment::Standard::ATMOSPHERIC_PRESSURE; // Standard as fallback
 }
 
 float LayeredMedium::getTemperatureAtHeight(float height) const {
@@ -64,7 +64,7 @@ float LayeredMedium::getTemperatureAtHeight(float height) const {
     if (layer) {
         return layer->getTemperatureAtHeight(height);
     }
-    return 288.15f; // 15°C in Kelvin as fallback
+    return Constants::Environment::Standard::STANDARD_TEMPERATURE; // Standard as fallback
 }
 
 float LayeredMedium::getViscosityAtHeight(float height) const {

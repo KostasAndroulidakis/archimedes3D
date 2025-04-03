@@ -2,6 +2,7 @@
 
 #include <memory>
 #include "../math/Vector2.h"
+// Include manager classes - these are actually used in the implementation
 #include "../managers/ObjectManager.h"
 #include "../managers/MediumManager.h"
 #include "../managers/FieldManager.h"

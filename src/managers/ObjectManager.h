@@ -3,6 +3,7 @@
 #include <vector>
 #include <memory>
 #include "../physics/PhysicsObject.h"
+#include "../environment/Medium.h"
 
 namespace Archimedes {
 
@@ -14,7 +15,7 @@ public:
     void addObject(std::shared_ptr<PhysicsObject> object);
     
     // Update physics for all objects
-    void updateObjects(float deltaTime, const class Medium& medium);
+    void updateObjects(float deltaTime, const Medium& medium);
     
     // Get all objects
     const std::vector<std::shared_ptr<PhysicsObject>>& getObjects() const { return m_objects; }

@@ -1,17 +1,11 @@
 #pragma once
 
 #include "../math/Vector2.h"
+#include "FieldTypes.h"
 #include <vector>
 #include <memory>
 
 namespace Archimedes {
-
-// Field behavior types
-enum class FieldType {
-    Electric,
-    Magnetic,
-    Plasma
-};
 
 class ElectromagneticField {
 public:
@@ -31,6 +25,13 @@ public:
     
     // Apply decay with distance
     virtual float calculateDecay(float distance) const;
+    
+    // Get field vectors for specific field types
+    virtual Vector2 getElectricFieldAt(const Vector2& position) const;
+    virtual Vector2 getMagneticFieldAt(const Vector2& position) const;
+    
+    // Update the field (for time-varying fields)
+    virtual void update(float deltaTime) {}
 
 protected:
     FieldType m_type;
@@ -83,7 +84,7 @@ public:
     bool isActive() const { return m_elapsedTime < m_duration; }
     
     // Update lightning (reduce strength over time)
-    void update(float deltaTime);
+    void update(float deltaTime) override;
     
     // Override field methods
     Vector2 getFieldVector(const Vector2& position) const override;
@@ -95,25 +96,6 @@ private:
     float m_duration;
     float m_elapsedTime;
     float m_initialStrength;
-};
-
-// Manager for multiple fields
-class FieldManager {
-public:
-    // Add fields
-    void addField(std::shared_ptr<ElectromagneticField> field);
-    
-    // Update all fields
-    void update(float deltaTime);
-    
-    // Get net field vector at position
-    Vector2 getNetFieldVector(const Vector2& position, FieldType type) const;
-    
-    // Get all fields of a specific type
-    std::vector<std::shared_ptr<ElectromagneticField>> getFieldsByType(FieldType type) const;
-    
-private:
-    std::vector<std::shared_ptr<ElectromagneticField>> m_fields;
 };
 
 } // namespace Archimedes

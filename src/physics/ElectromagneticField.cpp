@@ -34,6 +34,20 @@ float ElectromagneticField::calculateDecay(float distance) const {
     return 1.0f / squared(distance);
 }
 
+Vector2 ElectromagneticField::getElectricFieldAt(const Vector2& position) const {
+    if (m_type == FieldType::Electric) {
+        return getFieldVector(position);
+    }
+    return Vector2(0.0f, 0.0f);
+}
+
+Vector2 ElectromagneticField::getMagneticFieldAt(const Vector2& position) const {
+    if (m_type == FieldType::Magnetic) {
+        return getFieldVector(position);
+    }
+    return Vector2(0.0f, 0.0f);
+}
+
 // UniformField implementation
 UniformField::UniformField(FieldType type, float strength, const Vector2& direction)
     : ElectromagneticField(type, strength) {
@@ -169,58 +183,6 @@ float LightningField::getFieldStrengthAt(const Vector2& position) const {
     float distance = (position - closestPoint).magnitude();
     
     return m_strength * calculateDecay(distance);
-}
-
-// FieldManager implementation
-void FieldManager::addField(std::shared_ptr<ElectromagneticField> field) {
-    m_fields.push_back(field);
-}
-
-void FieldManager::update(float deltaTime) {
-    // Update all fields (e.g., lightning decays over time)
-    for (auto& field : m_fields) {
-        // Check if it's a lightning field
-        auto lightning = std::dynamic_pointer_cast<LightningField>(field);
-        if (lightning) {
-            lightning->update(deltaTime);
-        }
-    }
-    
-    // Remove expired fields
-    m_fields.erase(
-        std::remove_if(m_fields.begin(), m_fields.end(),
-            [](const std::shared_ptr<ElectromagneticField>& field) {
-                auto lightning = std::dynamic_pointer_cast<LightningField>(field);
-                return lightning && !lightning->isActive();
-            }
-        ),
-        m_fields.end()
-    );
-}
-
-Vector2 FieldManager::getNetFieldVector(const Vector2& position, FieldType type) const {
-    Vector2 netField(0.0f, 0.0f);
-    
-    // Sum all field vectors of the requested type
-    for (const auto& field : m_fields) {
-        if (field->getType() == type) {
-            netField += field->getFieldVector(position);
-        }
-    }
-    
-    return netField;
-}
-
-std::vector<std::shared_ptr<ElectromagneticField>> FieldManager::getFieldsByType(FieldType type) const {
-    std::vector<std::shared_ptr<ElectromagneticField>> result;
-    
-    for (const auto& field : m_fields) {
-        if (field->getType() == type) {
-            result.push_back(field);
-        }
-    }
-    
-    return result;
 }
 
 } // namespace Archimedes

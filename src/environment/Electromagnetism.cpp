@@ -3,8 +3,10 @@
 
 namespace Archimedes {
 
-std::shared_ptr<FieldManager> Electromagnetism::createStandardModel() {
-    auto fieldManager = std::make_shared<FieldManager>();
+void Electromagnetism::setupStandardModel(std::shared_ptr<FieldManager> fieldManager) {
+    if (!fieldManager) {
+        return;
+    }
     
     // Add global field (background field)
     fieldManager->addField(createGlobalField());
@@ -14,8 +16,6 @@ std::shared_ptr<FieldManager> Electromagnetism::createStandardModel() {
     
     // Add firmament barrier
     fieldManager->addField(createFirmamentBarrier());
-    
-    return fieldManager;
 }
 
 std::shared_ptr<UniformField> Electromagnetism::createGlobalField() {
